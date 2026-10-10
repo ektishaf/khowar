@@ -98,20 +98,19 @@ function buildKhowarSentence(inputText) {
     // 1. Detect Negation
     const isNegative = words.some(w => ["not", "dont", "doesnt", "didnt"].includes(w));
 
-    // 2. Identify Subject
+    // 2. Identify Subject (Keep raw token strings)
     const pronounObj = pronouns.find(p => words.includes(p.english.toLowerCase()));
     const personKey = pronounObj ? pronounObj.person : "i";
-    const khSubject = pronounObj ? formatKhowarText(pronounObj.khowar_raw) : "";
+    const rawSubject = pronounObj ? pronounObj.khowar_raw : "";
 
-    // 3. Identify Object Noun & Dynamically Attach Suffix from prepositionsData
+    // 3. Identify Object Noun & attach raw suffix (keep as raw tokens)
     const nounObj = nouns.find(n => words.includes(n.english.toLowerCase()));
-    let khObject = nounObj ? formatKhowarText(nounObj.khowar_raw) : "";
+    let rawObject = nounObj ? nounObj.khowar_raw : "";
     
-    if (khObject) {
-        // Look up directional preposition "to" dynamically from prepositionsData
+    if (rawObject) {
         const prepObj = preps.find(p => words.includes(p.english.toLowerCase()) && p.suffix);
         if (prepObj) {
-            khObject += formatKhowarText(prepObj.suffix); // Attaches "o[tl]" dynamically!
+            rawObject += prepObj.suffix; // Appends raw suffix like "o[tl]"
         }
     }
 
@@ -123,24 +122,26 @@ function buildKhowarSentence(inputText) {
         "goes", "go"
     ].includes(w)));
 
-    let khVerb = "";
+    let rawVerb = "";
     if (verbObj) {
         const tenseIdx = getTenseIndex(words, verbObj);
         const personConjugations = verbObj[personKey] || verbObj["i"];
         if (personConjugations && personConjugations[tenseIdx]) {
-            khVerb = formatKhowarText(personConjugations[tenseIdx]);
+            rawVerb = personConjugations[tenseIdx];
         }
     }
 
-    // 5. Look up negative token ("no") dynamically from prepositionsData
-    let khNegativeToken = "";
+    // 5. Look up raw negative token
+    let rawNegativeToken = "";
     if (isNegative) {
         const notObj = preps.find(p => p.english.toLowerCase() === "not" || p.english.toLowerCase() === "no");
-        khNegativeToken = formatKhowarText(notObj ? notObj.khowar_raw : "no");
+        rawNegativeToken = notObj ? notObj.khowar_raw : "[no]";
     }
 
-    // Assemble SOV output
-    return [khSubject, khObject, khNegativeToken, khVerb].filter(Boolean).join(" ");
+    // Assemble all raw tokens together FIRST, then format into PUA Unicode glyphs ONCE at the end
+    const rawSentence = [rawSubject, rawObject, rawNegativeToken, rawVerb].filter(Boolean).join(" ");
+    
+    return formatKhowarText(rawSentence);
 }
 
 /**
