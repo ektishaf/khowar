@@ -92,21 +92,27 @@ function buildKhowarSentence(inputText) {
 
     const nouns = typeof nounsData !== 'undefined' ? nounsData : [];
     const pronouns = typeof pronounsData !== 'undefined' ? pronounsData : [];
+    const preps = typeof prepositionsData !== 'undefined' ? prepositionsData : [];
     const verbs = typeof verbsData !== 'undefined' ? verbsData : [];
 
     // 1. Detect Negation
     const isNegative = words.some(w => ["not", "dont", "doesnt", "didnt"].includes(w));
 
-    // 2. Identify Subject & Person Key
+    // 2. Identify Subject
     const pronounObj = pronouns.find(p => words.includes(p.english.toLowerCase()));
     const personKey = pronounObj ? pronounObj.person : "i";
     const khSubject = pronounObj ? formatKhowarText(pronounObj.khowar_raw) : "";
 
-    // 3. Identify Object Noun & attach "-ot" if "to" is present
+    // 3. Identify Object Noun & Dynamically Attach Suffix from prepositionsData
     const nounObj = nouns.find(n => words.includes(n.english.toLowerCase()));
     let khObject = nounObj ? formatKhowarText(nounObj.khowar_raw) : "";
-    if (words.includes("to") && khObject) {
-        khObject += formatKhowarText("[ot]");
+    
+    if (khObject) {
+        // Look up directional preposition "to" dynamically from prepositionsData
+        const prepObj = preps.find(p => words.includes(p.english.toLowerCase()) && p.suffix);
+        if (prepObj) {
+            khObject += formatKhowarText(prepObj.suffix); // Attaches "o[tl]" dynamically!
+        }
     }
 
     // 4. Identify Verb & Pick Tense Index (0-4)
@@ -126,10 +132,14 @@ function buildKhowarSentence(inputText) {
         }
     }
 
-    // 5. Place Negative Token ("no") directly before verb
-    const khNegativeToken = isNegative ? formatKhowarText("[no]") : "";
+    // 5. Look up negative token ("no") dynamically from prepositionsData
+    let khNegativeToken = "";
+    if (isNegative) {
+        const notObj = preps.find(p => p.english.toLowerCase() === "not" || p.english.toLowerCase() === "no");
+        khNegativeToken = formatKhowarText(notObj ? notObj.khowar_raw : "no");
+    }
 
-    // Assemble SOV: Subject + Object(with suffix) + [no] + Verb
+    // Assemble SOV output
     return [khSubject, khObject, khNegativeToken, khVerb].filter(Boolean).join(" ");
 }
 
