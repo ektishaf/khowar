@@ -86,6 +86,10 @@ function getTenseIndex(words, verbObj) {
 /**
  * Builds Khowar SOV sentences with subject agreement, -ot locative suffix, and tense mapping.
  */
+/**
+ * Builds Khowar SOV sentences with subject-verb-tense agreement 
+ * and direct suffix concatenation (e.g., noun + "o[tl]").
+ */
 function buildKhowarSentence(inputText) {
     const cleanText = inputText.toLowerCase().replace(/['"]/g, '');
     const words = cleanText.split(/\s+/);
@@ -98,28 +102,26 @@ function buildKhowarSentence(inputText) {
     // 1. Detect Negation
     const isNegative = words.some(w => ["not", "dont", "doesnt", "didnt"].includes(w));
 
-    // 2. Identify Subject (Match pronoun where english string exists in input text)
-    // Sorting by length descending ensures "they" is matched before "he" if applicable
+    // 2. Identify Subject (Matches multi-word pronouns safely)
     const sortedPronouns = [...pronouns].sort((a, b) => b.english.length - a.english.length);
     const pronounObj = sortedPronouns.find(p => cleanText.includes(p.english.toLowerCase()));
     
     const personKey = pronounObj ? pronounObj.person : "i";
     const rawSubject = pronounObj ? pronounObj.khowar_raw : "";
 
-    // 3. Identify Object Noun & attach raw suffix from prepositionsData
+    // 3. Identify Object Noun & attach phonetic suffix string directly (e.g., "o[tl]")
     const nounObj = nouns.find(n => cleanText.includes(n.english.toLowerCase()));
     let rawObject = nounObj ? nounObj.khowar_raw : "";
     
     if (rawObject) {
-        // Look up directional preposition ("to") by checking if "to" is in text
+        // Look up directional preposition ("to") and append its raw suffix string
         const prepObj = preps.find(p => cleanText.includes(p.english.toLowerCase()) && (p.suffix || p.khowar_raw));
         if (prepObj) {
-            // Use suffix if available, otherwise fallback to khowar_raw
-            rawObject += (prepObj.suffix || prepObj.khowar_raw); 
+            rawObject += (prepObj.suffix || prepObj.khowar_raw); // e.g., appends literal "o[tl]"
         }
     }
 
-    // 4. Identify Verb & Pick Tense Index (0-4)
+    // 4. Identify Verb & Pick Tense Index (0: Past Perf Cont, 1: Past Perf, 2: Past, 3: Present, 4: Future)
     const verbObj = verbs.find(v => words.some(w => [
         v.english.first.toLowerCase(), 
         v.english.second.toLowerCase(), 
@@ -140,11 +142,13 @@ function buildKhowarSentence(inputText) {
     let rawNegativeToken = "";
     if (isNegative) {
         const notObj = preps.find(p => p.english.toLowerCase() === "not" || p.english.toLowerCase() === "no");
-        rawNegativeToken = notObj ? notObj.khowar_raw : "[no]";
+        rawNegativeToken = notObj ? notObj.khowar_raw : "no";
     }
 
-    // Combine raw strings first, then format all glyphs in one clean pass
+    // Combine raw sentence components in SOV order
     const rawSentence = [rawSubject, rawObject, rawNegativeToken, rawVerb].filter(Boolean).join(" ");
+
+    // Perform final PUA character lookup on the assembled string
     return formatKhowarText(rawSentence);
 }
 
