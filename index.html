@@ -179,11 +179,13 @@
     <script src="js/translator.js"></script>
 
     <script>
-        // Render Glyph Cards into Grid
-        function renderGlyphs() {
-            const grid = document.getElementById('glyphGrid');
-            grid.innerHTML = '';
-            
+    // Render Glyph Cards into Grid
+    function renderGlyphs() {
+        const grid = document.getElementById('glyphGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        
+        if (typeof khowarGlyphs !== 'undefined') {
             Object.keys(khowarGlyphs).forEach(token => {
                 const char = khowarGlyphs[token];
                 const codePoint = 'U+' + char.charCodeAt(0).toString(16).toUpperCase();
@@ -204,66 +206,55 @@
                 grid.appendChild(card);
             });
         }
+    }
 
-        // Handle Search & Translation
-        function triggerTranslation() {
-            const query = document.getElementById('searchInput').value;
-            const direction = document.getElementById('directionSelect').value;
-            const outputEl = document.getElementById('translationOutput');
+    // Handle Search & Translation
+    function triggerTranslation() {
+        const query = document.getElementById('searchInput').value;
+        const direction = document.getElementById('directionSelect').value;
+        const outputEl = document.getElementById('translationOutput');
 
-            if (!query.trim()) {
-                outputEl.innerHTML = '<span style="color: var(--text-muted); font-size: 1rem;">Translation output will appear here...</span>';
-                return;
-            }
-
-            // Calls your translateQuery function from translator.js
-            const result = translateQuery(query, direction, vocabularyData, sentencesData);
-            outputEl.textContent = result;
+        if (!query.trim()) {
+            outputEl.innerHTML = '<span style="color: var(--text-muted); font-size: 1rem;">Translation output will appear here...</span>';
+            return;
         }
 
-        // Event Listeners
-        document.getElementById('searchInput').addEventListener('input', triggerTranslation);
-        document.getElementById('directionSelect').addEventListener('change', triggerTranslation);
+        // Fixed: Call translateQuery without passing deleted vocabularyData parameter
+        const result = translateQuery(query, direction);
+        outputEl.textContent = result;
+    }
 
-        // Language toggle UI
-        document.getElementById('langSelect').addEventListener('change', (e) => {
-            const isKhowar = e.target.value === 'kh';
-            document.getElementById('transTitle').textContent = isKhowar ? "Khowar Translator (خوار)" : "Khowar Translator";
-            document.getElementById('glyphTitle').textContent = isKhowar ? "Khowar Glyphs (حروف)" : "Khowar Font PUA Glyphs";
-        });
+    // Event Listeners
+    document.getElementById('searchInput').addEventListener('input', triggerTranslation);
+    document.getElementById('directionSelect').addEventListener('change', triggerTranslation);
 
-        // Initialize Page Locally
-        window.addEventListener('DOMContentLoaded', () => {
-            renderGlyphs();
-            document.getElementById('outputText').textContent = "Translation output will appear here...";
-        });
+    // Language toggle UI
+    document.getElementById('langSelect').addEventListener('change', (e) => {
+        const isKhowar = e.target.value === 'kh';
+        document.getElementById('transTitle').textContent = isKhowar ? "Khowar Translator (خوار)" : "Khowar Translator";
+        document.getElementById('glyphTitle').textContent = isKhowar ? "Khowar Glyphs (حروف)" : "Khowar Font PUA Glyphs";
+    });
 
-        // Automatically parse URL parameters and translate on page load
-        function handleUrlParameters() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const query = urlParams.get('q');
-            const direction = urlParams.get('dir');
+    // Automatically parse URL parameters (?q=...&dir=...)
+    function handleUrlParameters() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const query = urlParams.get('q');
+        const direction = urlParams.get('dir');
 
-            if (query) {
-                document.getElementById('searchInput').value = query;
-                
-                if (direction) {
-                    document.getElementById('directionSelect').value = direction;
-                }
-
-                // Run translation immediately
-                triggerTranslation();
+        if (query) {
+            document.getElementById('searchInput').value = query;
+            if (direction) {
+                document.getElementById('directionSelect').value = direction;
             }
+            triggerTranslation();
         }
+    }
 
-        // Call inside your DOMContentLoaded event listener:
-        window.addEventListener('DOMContentLoaded', () => {
-            renderGlyphs();
-            document.getElementById('outputText').textContent = "Translation output will appear here...";
-            
-            // Process incoming URL query parameters
-            handleUrlParameters();
-        });
-    </script>
+    // Single Consolidated DOMContentLoaded Initialization
+    window.addEventListener('DOMContentLoaded', () => {
+        renderGlyphs();
+        handleUrlParameters();
+    });
+</script>
 </body>
 </html>
