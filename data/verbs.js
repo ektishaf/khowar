@@ -7,11 +7,11 @@ const verbsData = [
       "third": "gone"
     },
     // Array Order: [0: Past Perf Cont, 1: Past Perf, 2: Past, 3: Present, 4: Future]
-    "i": ["boghaoshtam", "bisum", "baghatam", "bim", "bim"],
-    "you": ["boghaoshtai", "bisai", "baghatai", "bis", "bis"],
-    "he_she_it": ["boghaoshtai", "bir", "baghatai", "bir", "bir"],
-    "we": ["boghaoshtan", "bisi", "baghatan", "bisa", "bisa"],
-    "they": ["boghaoshtar", "bini", "baghatar", "bini", "bini"]
+    "i": ["bo[gh]aosh[tl]am", "bisum", "ba[gh]a[tl]am", "bim", "bim"],
+    "you": ["bo[gh]aosh[tl]ao", "bisus", "ba[gh]ao", "bis", "bis"],
+    "he_she_it": ["bo[gh]aosh[tl]am", "bir", "ba[gh]ai", "bir", "bir"],
+    "we": ["bo[gh]aosh[tl]am", "bisusi", "ba[gh]a[tl]am", "bisi", "bisi"],
+    "they": ["bo[gh]aosh[tl]ani", "bisuni", "ba[gh]ani", "bini", "bini"]
   },
   {
     "id": "v002",
