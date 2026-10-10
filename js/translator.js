@@ -176,3 +176,120 @@ function translateQuery(query, direction = "en-to-kh") {
     // Single-word lookup fallback
     return words.map(w => translateWord(w, direction)).join(" ");
 }
+
+/**
+ * Reverse mapping pass: converts PUA glyph characters back to raw bracketed tokens
+ * for dictionary lookup when translating Khowar -> English.
+ */
+function unformatKhowarText(text) {
+    if (!text || typeof khowarGlyphs === 'undefined') return text;
+    let rawText = text;
+    Object.keys(khowarGlyphs).forEach(token => {
+        const glyphChar = khowarGlyphs[token];
+        if (glyphChar) {
+            rawText = rawText.replaceAll(glyphChar, token);
+        }
+    });
+    return rawText;
+}
+
+/**
+ * Khowar ➔ English Reverse Engine (SOV ➔ SVO)
+ * Leaves buildKhowarSentence untouched.
+ */
+function buildEnglishSentence(inputText) {
+    const rawText = unformatKhowarText(inputText.trim());
+
+    const nouns = typeof nounsData !== 'undefined' ? nounsData : [];
+    const pronouns = typeof pronounsData !== 'undefined' ? pronounsData : [];
+    const preps = typeof prepositionsData !== 'undefined' ? prepositionsData : [];
+    const verbs = typeof verbsData !== 'undefined' ? verbsData : [];
+
+    let enSubject = "";
+    let enVerb = "";
+    let enObject = "";
+    let prepPrefix = "";
+
+    // 1. Identify Subject Pronoun
+    const pronounObj = pronouns.find(p => rawText.includes(p.khowar_raw));
+    if (pronounObj) {
+        enSubject = pronounObj.english;
+    }
+
+    // 2. Identify Noun & Preposition Suffix (e.g. "o[tl]")
+    for (const noun of nouns) {
+        if (rawText.includes(noun.khowar_raw)) {
+            enObject = noun.english;
+            
+            const prepMatch = preps.find(p => p.suffix && rawText.includes(noun.khowar_raw + p.suffix));
+            if (prepMatch) {
+                prepPrefix = prepMatch.english; // e.g. "to"
+            }
+            break;
+        }
+    }
+
+    // 3. Reverse Verb Lookup across 5 Tenses
+    for (const verb of verbs) {
+        for (const personKey of ["i", "you", "he_she_it", "we", "they"]) {
+            const conjugations = verb[personKey];
+            if (conjugations) {
+                const tenseIdx = conjugations.findIndex(c => c && rawText.includes(c));
+                if (tenseIdx !== -1) {
+                    if (tenseIdx === 2) enVerb = verb.english.second;
+                    else if (tenseIdx === 4) enVerb = "will " + verb.english.first;
+                    else enVerb = verb.english.first;
+                    
+                    if (!enSubject) {
+                        enSubject = personKey === "i" ? "I" : personKey;
+                    }
+                    break;
+                }
+            }
+        }
+        if (enVerb) break;
+    }
+
+    // Assemble English SVO order: Subject + Verb + Preposition + Object
+    return [enSubject, enVerb, prepPrefix, enObject].filter(Boolean).join(" ");
+}
+
+/**
+ * Updated Router: delegates to your working buildKhowarSentence for en-to-kh
+ * and buildEnglishSentence for kh-to-en.
+ */
+function translateQuery(query, direction = "en-to-kh") {
+    const cleanQuery = query.trim();
+    if (!cleanQuery) return "";
+
+    // 1. Sentence Database Match
+    if (typeof sentencesData !== 'undefined') {
+        const exactSentence = sentencesData.find(s => {
+            if (direction === "en-to-kh") {
+                return s.english_text.toLowerCase() === cleanQuery.toLowerCase();
+            } else {
+                return s.khowar_raw === unformatKhowarText(cleanQuery) || 
+                       formatKhowarText(s.khowar_raw) === cleanQuery;
+            }
+        });
+
+        if (exactSentence) {
+            return direction === "en-to-kh" 
+                ? formatKhowarText(exactSentence.khowar_raw) 
+                : exactSentence.english_text;
+        }
+    }
+
+    // 2. Multi-word or Directional Routing
+    const words = cleanQuery.split(/\s+/);
+    if (words.length > 1 || direction === "kh-to-en") {
+        if (direction === "en-to-kh") {
+            return buildKhowarSentence(cleanQuery); // Uses your working function exactly as-is
+        } else {
+            return buildEnglishSentence(cleanQuery);
+        }
+    }
+
+    // 3. Single Word Fallback
+    return translateWord(cleanQuery, direction);
+}
