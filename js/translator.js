@@ -14,7 +14,6 @@ function translateWord(word, direction = "en-to-kh") {
     const clean = word.trim().toLowerCase();
     if (!clean) return "";
 
-    // Safely check dataset availability
     const nouns = typeof nounsData !== 'undefined' ? nounsData : [];
     const pronouns = typeof pronounsData !== 'undefined' ? pronounsData : [];
     const preps = typeof prepositionsData !== 'undefined' ? prepositionsData : [];
@@ -33,11 +32,13 @@ function translateWord(word, direction = "en-to-kh") {
         const vMatch = verbs.find(v => 
             v.english.first.toLowerCase() === clean || 
             v.english.second.toLowerCase() === clean || 
-            v.english.third.toLowerCase() === clean ||
+            (v.english.third && v.english.third.toLowerCase() === clean) ||
             clean === "goes"
         );
         if (vMatch) {
-            return formatKhowarText(vMatch.khowar_present ? vMatch.khowar_present.i : "");
+            // Default to Present (index 3) for single word lookup
+            const personConjugations = vMatch["i"] || [];
+            return formatKhowarText(personConjugations[3] || vMatch.english.first);
         }
     } else {
         const pMatch = pronouns.find(p => formatKhowarText(p.khowar_raw).toLowerCase() === clean || p.khowar_raw.toLowerCase() === clean);
@@ -51,7 +52,39 @@ function translateWord(word, direction = "en-to-kh") {
 }
 
 /**
- * Main Dynamic Sentence Assembly Engine
+ * Detects tense index (0 to 4) for the 5-tense verb array:
+ * 0: Past Perfect Continuous
+ * 1: Past Perfect
+ * 2: Past
+ * 3: Present
+ * 4: Future
+ */
+function getTenseIndex(words, verbObj) {
+    if (!verbObj) return 3; // Default Present
+
+    // 0: Past Perfect Continuous ("had been ...ing")
+    if (words.includes("had") && (words.includes("been") || words.some(w => w.endsWith("ing")))) {
+        return 0;
+    }
+    // 1: Past Perfect ("had ...")
+    if (words.includes("had") || (verbObj.english.third && words.includes(verbObj.english.third.toLowerCase()))) {
+        return 1;
+    }
+    // 2: Past Tense ("went", "ate", "did")
+    if ((verbObj.english.second && words.includes(verbObj.english.second.toLowerCase())) || words.includes("did")) {
+        return 2;
+    }
+    // 4: Future Tense ("will", "shall")
+    if (words.includes("will") || words.includes("shall")) {
+        return 4;
+    }
+
+    // 3: Default Present
+    return 3;
+}
+
+/**
+ * Builds Khowar SOV sentences with subject agreement, -ot locative suffix, and tense mapping.
  */
 function buildKhowarSentence(inputText) {
     const cleanText = inputText.toLowerCase().replace(/['"]/g, '');
@@ -61,15 +94,15 @@ function buildKhowarSentence(inputText) {
     const pronouns = typeof pronounsData !== 'undefined' ? pronounsData : [];
     const verbs = typeof verbsData !== 'undefined' ? verbsData : [];
 
-    // 1. Detect Negation ("not", "dont", "doesnt", "didnt")
+    // 1. Detect Negation
     const isNegative = words.some(w => ["not", "dont", "doesnt", "didnt"].includes(w));
 
-    // 2. Identify Subject & Person Key ("i", "you", "he_she_it", "we", "they")
+    // 2. Identify Subject & Person Key
     const pronounObj = pronouns.find(p => words.includes(p.english.toLowerCase()));
     const personKey = pronounObj ? pronounObj.person : "i";
     const khSubject = pronounObj ? formatKhowarText(pronounObj.khowar_raw) : "";
 
-    // 3. Identify Object Noun & attach locative suffix "-ot" if "to" is present
+    // 3. Identify Object Noun & attach "-ot" if "to" is present
     const nounObj = nouns.find(n => words.includes(n.english.toLowerCase()));
     let khObject = nounObj ? formatKhowarText(nounObj.khowar_raw) : "";
     if (words.includes("to") && khObject) {
@@ -86,20 +119,17 @@ function buildKhowarSentence(inputText) {
 
     let khVerb = "";
     if (verbObj) {
-        // Calculate the tense index (0: Past Perf Cont, 1: Past Perf, 2: Past, 3: Present, 4: Future)
         const tenseIdx = getTenseIndex(words, verbObj);
-        
-        // Fetch matching conjugated verb array for the subject person
         const personConjugations = verbObj[personKey] || verbObj["i"];
         if (personConjugations && personConjugations[tenseIdx]) {
             khVerb = formatKhowarText(personConjugations[tenseIdx]);
         }
     }
 
-    // 5. Place Negative Token ("no") directly before the verb
+    // 5. Place Negative Token ("no") directly before verb
     const khNegativeToken = isNegative ? formatKhowarText("[no]") : "";
 
-    // Assemble SOV output: Subject + Object(with suffix) + [no] + Conjugated Verb
+    // Assemble SOV: Subject + Object(with suffix) + [no] + Verb
     return [khSubject, khObject, khNegativeToken, khVerb].filter(Boolean).join(" ");
 }
 
@@ -110,7 +140,7 @@ function translateQuery(query, direction = "en-to-kh") {
     const cleanQuery = query.trim().toLowerCase();
     if (!cleanQuery) return "";
 
-    // Check sentence database
+    // Check pre-built sentences/idioms database first
     if (typeof sentencesData !== 'undefined') {
         const exactSentence = sentencesData.find(s => s.english_text.toLowerCase() === cleanQuery);
         if (exactSentence) {
@@ -118,34 +148,12 @@ function translateQuery(query, direction = "en-to-kh") {
         }
     }
 
-    // Dynamic Sentence assembly if multiple words
+    // Multi-word rule-based SOV translation engine
     const words = cleanQuery.split(/\s+/);
     if (direction === "en-to-kh" && words.length > 1) {
         return buildKhowarSentence(cleanQuery);
     }
 
-    // Fallback: Word-by-word
+    // Single-word lookup fallback
     return words.map(w => translateWord(w, direction)).join(" ");
 }
-function getTenseIndex(words, verbObj) {
-    // Check for past indicators
-    if (words.includes("had") && (words.includes("been") || words.some(w => w.endsWith("ing")))) {
-        return 0; // Past Perfect Continuous
-    }
-    if (words.includes("had") || words.includes(verbObj.english.third)) {
-        return 1; // Past Perfect
-    }
-    if (words.includes(verbObj.english.second) || words.includes("did")) {
-        return 2; // Past
-    }
-    if (words.includes("will") || words.includes("shall")) {
-        return 4; // Future
-    }
-    
-    return 3; // Default: Present
-}
-
-// Inside sentence construction:
-const personKey = pronounObj ? pronounObj.person : "i"; // "i", "you", etc.
-const tenseIdx = getTenseIndex(words, verbObj);
-const khVerb = verbObj[personKey] ? formatKhowarText(verbObj[personKey][tenseIdx]) : "";
