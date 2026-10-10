@@ -98,19 +98,24 @@ function buildKhowarSentence(inputText) {
     // 1. Detect Negation
     const isNegative = words.some(w => ["not", "dont", "doesnt", "didnt"].includes(w));
 
-    // 2. Identify Subject (Keep raw token strings)
-    const pronounObj = pronouns.find(p => words.includes(p.english.toLowerCase()));
+    // 2. Identify Subject (Match pronoun where english string exists in input text)
+    // Sorting by length descending ensures "they" is matched before "he" if applicable
+    const sortedPronouns = [...pronouns].sort((a, b) => b.english.length - a.english.length);
+    const pronounObj = sortedPronouns.find(p => cleanText.includes(p.english.toLowerCase()));
+    
     const personKey = pronounObj ? pronounObj.person : "i";
     const rawSubject = pronounObj ? pronounObj.khowar_raw : "";
 
-    // 3. Identify Object Noun & attach raw suffix (keep as raw tokens)
-    const nounObj = nouns.find(n => words.includes(n.english.toLowerCase()));
+    // 3. Identify Object Noun & attach raw suffix from prepositionsData
+    const nounObj = nouns.find(n => cleanText.includes(n.english.toLowerCase()));
     let rawObject = nounObj ? nounObj.khowar_raw : "";
     
     if (rawObject) {
-        const prepObj = preps.find(p => words.includes(p.english.toLowerCase()) && p.suffix);
+        // Look up directional preposition ("to") by checking if "to" is in text
+        const prepObj = preps.find(p => cleanText.includes(p.english.toLowerCase()) && (p.suffix || p.khowar_raw));
         if (prepObj) {
-            rawObject += prepObj.suffix; // Appends raw suffix like "o[tl]"
+            // Use suffix if available, otherwise fallback to khowar_raw
+            rawObject += (prepObj.suffix || prepObj.khowar_raw); 
         }
     }
 
@@ -138,9 +143,8 @@ function buildKhowarSentence(inputText) {
         rawNegativeToken = notObj ? notObj.khowar_raw : "[no]";
     }
 
-    // Assemble all raw tokens together FIRST, then format into PUA Unicode glyphs ONCE at the end
+    // Combine raw strings first, then format all glyphs in one clean pass
     const rawSentence = [rawSubject, rawObject, rawNegativeToken, rawVerb].filter(Boolean).join(" ");
-    
     return formatKhowarText(rawSentence);
 }
 
