@@ -1,15 +1,53 @@
 /**
- * Maps phonetic token strings (e.g. "[cl][ch]") into custom Khowar PUA Unicode glyphs.
+ * js/translator.js
+ * Rule-based translator supporting English ➔ Khowar (SOV) and Khowar ➔ English (SVO).
  */
-function formatKhowarText(text) {
-    if (!text) return "";
-    if (typeof khowarGlyphs === 'undefined') return text;
-    return text.replace(/\[[a-zA-Z0-9_]+\]/g, match => khowarGlyphs[match] || match);
+
+// Detects tense index (0: Past Perf Cont, 1: Past Perf, 2: Past, 3: Present, 4: Future)
+/**
+ * Dynamic 12-Tense Classifier Engine
+ * Maps English word auxiliary patterns to tense index (0 - 11)
+ */
+function getTenseIndex(words, verbObj) {
+    if (!verbObj) return 0; // Default Present Indefinite
+
+    const pastForm = verbObj.english.second ? verbObj.english.second.toLowerCase() : "";
+    const pastParticiple = verbObj.english.third ? verbObj.english.third.toLowerCase() : "";
+
+    const hasWill = words.includes("will") || words.includes("shall");
+    const hasHad = words.includes("had");
+    const hasHaveHas = words.includes("have") || words.includes("has");
+    const hasBeen = words.includes("been");
+    const hasWasWere = words.includes("was") || words.includes("were");
+    const hasAmIsAre = words.includes("am") || words.includes("is") || words.includes("are");
+    const hasIng = words.some(w => w.endsWith("ing"));
+    const hasV2 = pastForm && words.includes(pastForm);
+    const hasV3 = pastParticiple && words.includes(pastParticiple);
+
+    // --- FUTURE TENSES ---
+    if (hasWill) {
+        if (hasHaveHas && hasBeen && hasIng) return 11; // Future Perfect Continuous
+        if (hasHaveHas && (hasV3 || words.includes("done"))) return 10; // Future Perfect
+        if (words.includes("be") && hasIng) return 9;   // Future Continuous
+        return 8;                                       // Future Indefinite
+    }
+
+    // --- PAST TENSES ---
+    if (hasHad && hasBeen && hasIng) return 7;         // Past Perfect Continuous
+    if (hasHad) return 6;                              // Past Perfect
+    if (hasWasWere && hasIng) return 5;                // Past Continuous
+    if (hasV2 || words.includes("did")) return 4;     // Past Indefinite
+
+    // --- PRESENT TENSES ---
+    if (hasHaveHas && hasBeen && hasIng) return 3;     // Present Perfect Continuous
+    if (hasHaveHas) return 2;                          // Present Perfect
+    if ((hasAmIsAre && hasIng) || hasIng) return 1;    // Present Continuous
+    
+    // Default Present Indefinite (Index 0)
+    return 0; 
 }
 
-/**
- * Single-word lookup across datasets
- */
+// Single word lookup fallback
 function translateWord(word, direction = "en-to-kh") {
     const clean = word.trim().toLowerCase();
     if (!clean) return "";
@@ -32,64 +70,25 @@ function translateWord(word, direction = "en-to-kh") {
         const vMatch = verbs.find(v => 
             v.english.first.toLowerCase() === clean || 
             v.english.second.toLowerCase() === clean || 
-            (v.english.third && v.english.third.toLowerCase() === clean) ||
-            clean === "goes"
+            (v.english.third && v.english.third.toLowerCase() === clean)
         );
         if (vMatch) {
-            // Default to Present (index 3) for single word lookup
             const personConjugations = vMatch["i"] || [];
             return formatKhowarText(personConjugations[3] || vMatch.english.first);
         }
     } else {
-        const pMatch = pronouns.find(p => formatKhowarText(p.khowar_raw).toLowerCase() === clean || p.khowar_raw.toLowerCase() === clean);
+        const unformattedClean = unformatKhowarText(clean);
+        const pMatch = pronouns.find(p => p.khowar_raw.toLowerCase() === unformattedClean);
         if (pMatch) return pMatch.english;
 
-        const nMatch = nouns.find(n => formatKhowarText(n.khowar_raw).toLowerCase() === clean || n.khowar_raw.toLowerCase() === clean);
+        const nMatch = nouns.find(n => n.khowar_raw.toLowerCase() === unformattedClean);
         if (nMatch) return nMatch.english;
     }
 
     return word;
 }
 
-/**
- * Detects tense index (0 to 4) for the 5-tense verb array:
- * 0: Past Perfect Continuous
- * 1: Past Perfect
- * 2: Past
- * 3: Present
- * 4: Future
- */
-function getTenseIndex(words, verbObj) {
-    if (!verbObj) return 3; // Default Present
-
-    // 0: Past Perfect Continuous ("had been ...ing")
-    if (words.includes("had") && (words.includes("been") || words.some(w => w.endsWith("ing")))) {
-        return 0;
-    }
-    // 1: Past Perfect ("had ...")
-    if (words.includes("had") || (verbObj.english.third && words.includes(verbObj.english.third.toLowerCase()))) {
-        return 1;
-    }
-    // 2: Past Tense ("went", "ate", "did")
-    if ((verbObj.english.second && words.includes(verbObj.english.second.toLowerCase())) || words.includes("did")) {
-        return 2;
-    }
-    // 4: Future Tense ("will", "shall")
-    if (words.includes("will") || words.includes("shall")) {
-        return 4;
-    }
-
-    // 3: Default Present
-    return 3;
-}
-
-/**
- * Builds Khowar SOV sentences with subject agreement, -ot locative suffix, and tense mapping.
- */
-/**
- * Builds Khowar SOV sentences with subject-verb-tense agreement 
- * and direct suffix concatenation (e.g., noun + "o[tl]").
- */
+// Builds Khowar SOV Sentences
 function buildKhowarSentence(inputText) {
     const cleanText = inputText.toLowerCase().replace(/['"]/g, '');
     const words = cleanText.split(/\s+/);
@@ -99,35 +98,36 @@ function buildKhowarSentence(inputText) {
     const preps = typeof prepositionsData !== 'undefined' ? prepositionsData : [];
     const verbs = typeof verbsData !== 'undefined' ? verbsData : [];
 
-    // 1. Detect Negation
     const isNegative = words.some(w => ["not", "dont", "doesnt", "didnt"].includes(w));
 
-    // 2. Identify Subject (Matches multi-word pronouns safely)
+    // Subject
     const sortedPronouns = [...pronouns].sort((a, b) => b.english.length - a.english.length);
     const pronounObj = sortedPronouns.find(p => cleanText.includes(p.english.toLowerCase()));
-    
     const personKey = pronounObj ? pronounObj.person : "i";
     const rawSubject = pronounObj ? pronounObj.khowar_raw : "";
 
-    // 3. Identify Object Noun & attach phonetic suffix string directly (e.g., "o[tl]")
+    // Object Noun + Preposition Suffix
     const nounObj = nouns.find(n => cleanText.includes(n.english.toLowerCase()));
     let rawObject = nounObj ? nounObj.khowar_raw : "";
-    
     if (rawObject) {
-        // Look up directional preposition ("to") and append its raw suffix string
         const prepObj = preps.find(p => cleanText.includes(p.english.toLowerCase()) && (p.suffix || p.khowar_raw));
         if (prepObj) {
-            rawObject += (prepObj.suffix || prepObj.khowar_raw); // e.g., appends literal "o[tl]"
+            rawObject += (prepObj.suffix || prepObj.khowar_raw);
         }
     }
 
-    // 4. Identify Verb & Pick Tense Index (0: Past Perf Cont, 1: Past Perf, 2: Past, 3: Present, 4: Future)
-    const verbObj = verbs.find(v => words.some(w => [
-        v.english.first.toLowerCase(), 
-        v.english.second.toLowerCase(), 
-        v.english.third ? v.english.third.toLowerCase() : "", 
-        "goes", "go"
-    ].includes(w)));
+    // Verb
+    const verbObj = verbs.find(v => {
+        const base = v.english.first ? v.english.first.toLowerCase() : "";
+        const past = v.english.second ? v.english.second.toLowerCase() : "";
+        const pastParticiple = v.english.third ? v.english.third.toLowerCase() : "";
+
+        return words.some(w => 
+            w === base || w === past || w === pastParticiple || 
+            w === base + "s" || w === base + "es" || w === base + "ing" ||
+            (base.endsWith('e') && w === base.slice(0, -1) + "ing")
+        );
+    });
 
     let rawVerb = "";
     if (verbObj) {
@@ -138,65 +138,18 @@ function buildKhowarSentence(inputText) {
         }
     }
 
-    // 5. Look up raw negative token
+    // Negative
     let rawNegativeToken = "";
     if (isNegative) {
         const notObj = preps.find(p => p.english.toLowerCase() === "not" || p.english.toLowerCase() === "no");
         rawNegativeToken = notObj ? notObj.khowar_raw : "no";
     }
 
-    // Combine raw sentence components in SOV order
     const rawSentence = [rawSubject, rawObject, rawNegativeToken, rawVerb].filter(Boolean).join(" ");
-
-    // Perform final PUA character lookup on the assembled string
     return formatKhowarText(rawSentence);
 }
 
-/**
- * Main Translation Router
- */
-function translateQuery(query, direction = "en-to-kh") {
-    const cleanQuery = query.trim().toLowerCase();
-    if (!cleanQuery) return "";
-
-    // Check pre-built sentences/idioms database first
-    if (typeof sentencesData !== 'undefined') {
-        const exactSentence = sentencesData.find(s => s.english_text.toLowerCase() === cleanQuery);
-        if (exactSentence) {
-            return formatKhowarText(exactSentence.khowar_raw);
-        }
-    }
-
-    // Multi-word rule-based SOV translation engine
-    const words = cleanQuery.split(/\s+/);
-    if (direction === "en-to-kh" && words.length > 1) {
-        return buildKhowarSentence(cleanQuery);
-    }
-
-    // Single-word lookup fallback
-    return words.map(w => translateWord(w, direction)).join(" ");
-}
-
-/**
- * Reverse mapping pass: converts PUA glyph characters back to raw bracketed tokens
- * for dictionary lookup when translating Khowar -> English.
- */
-function unformatKhowarText(text) {
-    if (!text || typeof khowarGlyphs === 'undefined') return text;
-    let rawText = text;
-    Object.keys(khowarGlyphs).forEach(token => {
-        const glyphChar = khowarGlyphs[token];
-        if (glyphChar) {
-            rawText = rawText.replaceAll(glyphChar, token);
-        }
-    });
-    return rawText;
-}
-
-/**
- * Khowar ➔ English Reverse Engine (SOV ➔ SVO)
- * Leaves buildKhowarSentence untouched.
- */
+// Builds English SVO Sentences
 function buildEnglishSentence(inputText) {
     const rawText = unformatKhowarText(inputText.trim());
 
@@ -210,26 +163,18 @@ function buildEnglishSentence(inputText) {
     let enObject = "";
     let prepPrefix = "";
 
-    // 1. Identify Subject Pronoun
     const pronounObj = pronouns.find(p => rawText.includes(p.khowar_raw));
-    if (pronounObj) {
-        enSubject = pronounObj.english;
-    }
+    if (pronounObj) enSubject = pronounObj.english;
 
-    // 2. Identify Noun & Preposition Suffix (e.g. "o[tl]")
     for (const noun of nouns) {
         if (rawText.includes(noun.khowar_raw)) {
             enObject = noun.english;
-            
             const prepMatch = preps.find(p => p.suffix && rawText.includes(noun.khowar_raw + p.suffix));
-            if (prepMatch) {
-                prepPrefix = prepMatch.english; // e.g. "to"
-            }
+            if (prepMatch) prepPrefix = prepMatch.english;
             break;
         }
     }
 
-    // 3. Reverse Verb Lookup across 5 Tenses
     for (const verb of verbs) {
         for (const personKey of ["i", "you", "he_she_it", "we", "they"]) {
             const conjugations = verb[personKey];
@@ -239,10 +184,8 @@ function buildEnglishSentence(inputText) {
                     if (tenseIdx === 2) enVerb = verb.english.second;
                     else if (tenseIdx === 4) enVerb = "will " + verb.english.first;
                     else enVerb = verb.english.first;
-                    
-                    if (!enSubject) {
-                        enSubject = personKey === "i" ? "I" : personKey;
-                    }
+
+                    if (!enSubject) enSubject = personKey === "i" ? "I" : personKey;
                     break;
                 }
             }
@@ -250,19 +193,14 @@ function buildEnglishSentence(inputText) {
         if (enVerb) break;
     }
 
-    // Assemble English SVO order: Subject + Verb + Preposition + Object
     return [enSubject, enVerb, prepPrefix, enObject].filter(Boolean).join(" ");
 }
 
-/**
- * Updated Router: delegates to your working buildKhowarSentence for en-to-kh
- * and buildEnglishSentence for kh-to-en.
- */
+// Router
 function translateQuery(query, direction = "en-to-kh") {
     const cleanQuery = query.trim();
     if (!cleanQuery) return "";
 
-    // 1. Sentence Database Match
     if (typeof sentencesData !== 'undefined') {
         const exactSentence = sentencesData.find(s => {
             if (direction === "en-to-kh") {
@@ -274,22 +212,14 @@ function translateQuery(query, direction = "en-to-kh") {
         });
 
         if (exactSentence) {
-            return direction === "en-to-kh" 
-                ? formatKhowarText(exactSentence.khowar_raw) 
-                : exactSentence.english_text;
+            return direction === "en-to-kh" ? formatKhowarText(exactSentence.khowar_raw) : exactSentence.english_text;
         }
     }
 
-    // 2. Multi-word or Directional Routing
     const words = cleanQuery.split(/\s+/);
     if (words.length > 1 || direction === "kh-to-en") {
-        if (direction === "en-to-kh") {
-            return buildKhowarSentence(cleanQuery); // Uses your working function exactly as-is
-        } else {
-            return buildEnglishSentence(cleanQuery);
-        }
+        return direction === "en-to-kh" ? buildKhowarSentence(cleanQuery) : buildEnglishSentence(cleanQuery);
     }
 
-    // 3. Single Word Fallback
     return translateWord(cleanQuery, direction);
 }

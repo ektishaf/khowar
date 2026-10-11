@@ -1,29 +1,13 @@
 const verbsData = [
   {
-    "id": "v001",
-    "english": {
-      "first": "go",
-      "second": "went",
-      "third": "gone"
-    },
-    // Array Order: [0: Past Perf Cont, 1: Past Perf, 2: Past, 3: Present, 4: Future]
-    "i": ["bo[gh]aosh[tl]am", "bisum", "ba[gh]a[tl]am", "bim", "bim"],
-    "you": ["bo[gh]aosh[tl]ao", "bisus", "ba[gh]ao", "bis", "bis"],
-    "he_she_it": ["bo[gh]aosh[tl]am", "bir", "ba[gh]ai", "bir", "bir"],
-    "we": ["bo[gh]aosh[tl]am", "bisusi", "ba[gh]a[tl]am", "bisi", "bisi"],
-    "they": ["bo[gh]aosh[tl]ani", "bisuni", "ba[gh]ani", "bini", "bini"]
-  },
-  {
-    "id": "v002",
-    "english": {
-      "first": "eat",
-      "second": "ate",
-      "third": "eaten"
-    },
-    "i": ["zhiboshtam", "zhibi-esum", "zhibitam", "zhibim", "zhibim"],
-    "you": ["zhiboshtai", "zhibi-esai", "zhibitai", "zhibis", "zhibis"],
-    "he_she_it": ["zhiboshtai", "zhibi-er", "zhibitai", "zhibir", "zhibir"],
-    "we": ["zhiboshtan", "zhibi-esi", "zhibitan", "zhibisa", "zhibisa"],
-    "they": ["zhiboshtar", "zhibi-eni", "zhibitar", "zhibini", "zhibini"]
-  }
+  "id": "v001",
+  "english": { "first": "go", "second": "went", "third": "gone" },
+  "i": ["biman", "biman", "bisum", "bo[gh]aosh[tl]am", "ba[gh]a[tl]am", "bo[gh]aosh[tl]am", "bistam", "bo[gh]aosh[tl]am", "bim", "bim", "bim", "bim"],
+  "you": ["bisan", "bisan", "bisus", "bo[gh]aosh[tl]ao", "ba[gh]ao", "bo[gh]aosh[tl]ao", "bistao", "bo[gh]aosh[tl]ao", "bis", "bis", "bis", "bis"],
+  "he": ["biran", "biran", "bisur", "bo[gh]aosh[tl]ai", "ba[gh]ai", "bo[gh]aosh[tl]ai", "bistai", "bo[gh]aosh[tl]ai", "bir", "bir", "bir", "bir"],
+  "she": ["biran", "biran", "bisur", "bo[gh]aosh[tl]ai", "ba[gh]ai", "bo[gh]aosh[tl]ai", "bistai", "bo[gh]aosh[tl]ai", "bir", "bir", "bir", "bir"],
+  "it": ["biran", "biran", "bisur", "bo[gh]aosh[tl]ai", "ba[gh]ai", "bo[gh]aosh[tl]ai", "bistai", "bo[gh]aosh[tl]ai", "bir", "bir", "bir", "bir"],
+  "we": ["bisian", "bisian", "bisusi", "bo[gh]aosh[tl]am", "ba[gh]a[tl]am", "bo[gh]aosh[tl]am", "bistam", "bo[gh]aosh[tl]am", "bisi", "bisi", "bisi", "bisi"],
+  "they": ["binian", "binian", "bisuni", "bo[gh]aosh[tl]ani", "ba[gh]ani", "bo[gh]aosh[tl]ani", "bistani", "bo[gh]aosh[tl]ani", "bini", "bini", "bini", "bini"],
+}
 ];

@@ -1,0 +1,163 @@
+@font-face {
+    font-family: 'KhowarRegular';
+    src: url('../fonts/Khowar-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --accent: #2563eb;
+    --border: #e2e8f0;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+    padding: 0;
+}
+
+.khowar-font {
+    font-family: 'KhowarRegular', sans-serif;
+}
+
+header {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.search-controls {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+#searchInput {
+    font-family: 'KhowarRegular', system-ui, -apple-system, sans-serif;
+    font-size: 1.2rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.result-box {
+    background-color: var(--bg-color);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    min-height: 60px;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 1rem;
+}
+
+.glyph-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.1s;
+    position: relative;
+}
+
+.glyph-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.glyph-char {
+    font-size: 2.2rem;
+    margin-bottom: 0.25rem;
+}
+
+.glyph-code {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-family: monospace;
+}
+
+.token-label {
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-weight: bold;
+}
+
+.voice-icon {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-size: 0.85rem;
+    opacity: 0.6;
+    transition: opacity 0.15s, transform 0.15s;
+}
+
+.glyph-card:hover .voice-icon {
+    opacity: 1;
+    transform: scale(1.15);
+}
+
+.section-title {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: var(--text-main);
+    border-bottom: 2px solid var(--border);
+    padding: 0.5rem 0;
+}
+
+.listen-btn {
+    margin-top: 10px;
+    width: auto;
+    padding: 0.5rem 1rem;
+}

@@ -4,257 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Khowar Language Portal & Translator</title>
-    <style>
-        @font-face {
-            font-family: 'KhowarRegular';
-            src: url('fonts/Khowar-Regular.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap;
-        }
-
-        :root {
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --accent: #2563eb;
-            --border: #e2e8f0;
-        }
-
-        body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 0;
-        }
-
-        .khowar-font {
-            font-family: 'KhowarRegular', sans-serif;
-        }
-
-        header {
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .brand {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--accent);
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .search-controls {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        input[type="text"], select {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-
-        .result-box {
-            background-color: var(--bg-color);
-            border: 1px dashed var(--border);
-            border-radius: 8px;
-            padding: 1.5rem;
-            min-height: 60px;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 1rem;
-        }
-
-        .glyph-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.1s, border-color 0.1s;
-        }
-
-        .glyph-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        .glyph-char {
-            font-size: 2.2rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .glyph-code {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            font-family: monospace;
-        }
-
-        .glyph-token {
-            font-size: 0.8rem;
-            color: var(--accent);
-            font-weight: bold;
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <header>
-        <div class="brand">khowar.github.io (Local)</div>
-        <select id="langSelect" style="width: auto;">
-            <option value="en">English Version</option>
-            <option value="kh">Khowar Version</option>
-        </select>
-    </header>
-
-    <div class="container">
+<header>
+ <div class="brand">Khowar Simplified</div>
+ <select id="langSelect" style="width: auto;">
+ <option value="en">English Version</option>
+<option value="kh">Khowar Version</option>
+  </select>
+ </header>
+ <div class="container">
         <!-- Translator Section -->
         <div class="card">
             <h2 id="transTitle">Khowar Translator</h2>
             <div class="search-controls">
-                <input type="text" id="searchInput" placeholder="Type 'house', 'water', or click a glyph below...">
+                <input type="text" id="searchInput" placeholder="Type 'house', 'water', or click a character below...">
                 <select id="directionSelect" style="width: auto;">
                     <option value="en-to-kh">English ➔ Khowar</option>
                     <option value="kh-to-en">Khowar ➔ English</option>
                 </select>
             </div>
+            <!-- Unique Result Box -->
             <div class="result-box khowar-font" id="translationOutput">
                 <span style="color: var(--text-muted); font-size: 1rem;" id="outputText">Translation output will appear here...</span>
             </div>
         </div>
 
-        <!-- PUA Character Grid -->
-        <div class="card">
-            <h3 id="glyphTitle">Khowar Font PUA Glyphs</h3>
-            <div class="grid" id="glyphGrid"></div>
-        </div>
-    </div>
+        <!-- Audio Playback Control -->
+        <button onclick="playTranslationOutput()" class="glyph-card" style="margin-top: 10px; width: auto; padding: 0.5rem 1rem;">
+            🔊 Listen
+        </button>
 
-    <!-- Script Imports (Loaded locally without CORS issues) -->
-    
-    <!-- Character mappings -->
-    <script src="js/glyphs.js"></script>
+ <!-- Lowercase Khowar Alphabet -->
+<div class="card">
+ <h3 class="section-title">Khowar Alphabet (Lowercase)</h3>
+ <div class="grid" id="khowarLowercaseContainer"></div>
+ </div>
 
-    <!-- Modular Data Files -->
-    <script src="data/nouns.js"></script>
-    <script src="data/verbs.js"></script>
-    <script src="data/pronouns.js"></script>
-    <script src="data/prepositions.js"></script>
-    <script src="data/sentences.js"></script>
+ <!-- Uppercase Khowar Alphabet -->
+ <div class="card">
+ <h3 class="section-title">Khowar Alphabet (Uppercase)</h3>
+ <div class="grid" id="khowarUppercaseContainer"></div>
+ </div>
 
-    <!-- Translation Logic -->
-    <script src="js/translator.js"></script>
+ <!-- Special Khowar Letters (Lowercase PUA Glyphs) -->
+ <div class="card">
+ <h3 class="section-title" id="specialLowerTitle">Special Khowar Letters (Lowercase)</h3>
+ <div class="grid" id="specialLowercaseContainer"></div>
+ </div>
 
-    <script>
-    // Render Glyph Cards into Grid
-    function renderGlyphs() {
-        const grid = document.getElementById('glyphGrid');
-        if (!grid) return;
-        grid.innerHTML = '';
-        
-        if (typeof khowarGlyphs !== 'undefined') {
-            Object.keys(khowarGlyphs).forEach(token => {
-                const char = khowarGlyphs[token];
-                const codePoint = 'U+' + char.charCodeAt(0).toString(16).toUpperCase();
-                
-                const card = document.createElement('div');
-                card.className = 'glyph-card';
-                card.onclick = () => {
-                    const input = document.getElementById('searchInput');
-                    input.value += token;
-                    triggerTranslation();
-                };
+ <!-- Special Khowar Letters (Uppercase PUA Glyphs) -->
+ <div class="card">
+ <h3 class="section-title" id="specialUpperTitle">Special Khowar Letters (Uppercase)</h3>
+ <div class="grid" id="specialUppercaseContainer"></div>
+ </div>
+</div>
 
-                card.innerHTML = `
-                    <div class="glyph-char khowar-font">${char}</div>
-                    <div class="glyph-code">${codePoint}</div>
-                    <div class="glyph-token">${token}</div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-    }
+ <!-- Character mappings & Script Definition -->
+ <!-- Character Maps & Script Definition -->
+ <script src="js/glyphs.js"></script>
+<script src="js/script.js"></script>
 
-    // Handle Search & Translation
-    function triggerTranslation() {
-        const query = document.getElementById('searchInput').value;
-        const direction = document.getElementById('directionSelect').value;
-        const outputEl = document.getElementById('translationOutput');
+ <!-- Modular Data Files -->
+ <script src="data/nouns.js"></script>
+ <script src="data/verbs.js"></script>
+ <script src="data/pronouns.js"></script>
+ <script src="data/prepositions.js"></script>
+ <script src="data/sentences.js"></script>
 
-        if (!query.trim()) {
-            outputEl.innerHTML = '<span style="color: var(--text-muted); font-size: 1rem;">Translation output will appear here...</span>';
-            return;
-        }
-
-        // Fixed: Call translateQuery without passing deleted vocabularyData parameter
-        const result = translateQuery(query, direction);
-        outputEl.textContent = result;
-    }
-
-    // Event Listeners
-    document.getElementById('searchInput').addEventListener('input', triggerTranslation);
-    document.getElementById('directionSelect').addEventListener('change', triggerTranslation);
-
-    // Language toggle UI
-    document.getElementById('langSelect').addEventListener('change', (e) => {
-        const isKhowar = e.target.value === 'kh';
-        document.getElementById('transTitle').textContent = isKhowar ? "Khowar Translator (خوار)" : "Khowar Translator";
-        document.getElementById('glyphTitle').textContent = isKhowar ? "Khowar Glyphs (حروف)" : "Khowar Font PUA Glyphs";
-    });
-
-    // Automatically parse URL parameters (?q=...&dir=...)
-    function handleUrlParameters() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const query = urlParams.get('q');
-        const direction = urlParams.get('dir');
-
-        if (query) {
-            document.getElementById('searchInput').value = query;
-            if (direction) {
-                document.getElementById('directionSelect').value = direction;
-            }
-            triggerTranslation();
-        }
-    }
-
-    // Single Consolidated DOMContentLoaded Initialization
-    window.addEventListener('DOMContentLoaded', () => {
-        renderGlyphs();
-        handleUrlParameters();
-    });
-</script>
+ <!-- Modular Utilities Engine -->
+<script src="js/formatter.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/translator.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
