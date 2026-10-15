@@ -38,8 +38,11 @@ To help you master reading, writing, and understanding the custom Khowar script,
 
 > **Recommended Strategy**: Watch all 6 tutorial videos in sequence to gain a complete understanding of the script modifications, character ligatures, and glyph structures used across the platform.
 
-Watch the first lesson to get started:  
-👉 **[Have You Heard of Khowar? | Pakistan's Musical Language from Chitral] [https://www.youtube.com/watch?v=2SWx2Jb7a_g](https://www.youtube.com/watch?v=2SWx2Jb7a_g)**
+Watch the first lesson to get started:
+
+[![Have You Heard of Khowar? | Pakistan's Musical Language](https://img.youtube.com/vi/2SWx2Jb7a_g/maxresdefault.jpg)](https://www.youtube.com/watch?v=2SWx2Jb7a_g)
+
+👉 **[Have You Heard of Khowar? | Pakistan's Musical Language](https://www.youtube.com/watch?v=2SWx2Jb7a_g)**
 
 ---
 
