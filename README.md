@@ -40,8 +40,6 @@ To help you master reading, writing, and understanding the custom Khowar script,
 
 Watch the first lesson to get started:
 
-[![Have You Heard of Khowar? | Pakistan's Musical Language](https://img.youtube.com/vi/2SWx2Jb7a_g/maxresdefault.jpg)](https://www.youtube.com/watch?v=2SWx2Jb7a_g)
-
 👉 **[Have You Heard of Khowar? | Pakistan's Musical Language](https://www.youtube.com/watch?v=2SWx2Jb7a_g)**
 
 ---
