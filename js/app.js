@@ -31,8 +31,6 @@ window.renderAlphabetScript = function() {
 
 // 2. Render Special Khowar Glyph Cards
 window.renderSpecialLetters = function() {
-    console.group("🔤 [Glyph Rendering] Initializing Special Letters...");
-
     if (typeof khowarGlyphs === 'undefined') {
         console.error("❌ [Glyph Rendering] `khowarGlyphs` object is undefined! Check if js/glyphs.js is loaded.");
         console.groupEnd();
@@ -46,8 +44,7 @@ window.renderSpecialLetters = function() {
         }
 
         const entries = Object.entries(glyphMap);
-        console.log(`ℹ️ [Glyph Rendering] Processing ${entries.length} items for ${sectionName}...`);
-
+        
         return entries.map(([token, rawChar]) => {
             if (!rawChar) return '';
 
@@ -74,16 +71,10 @@ window.renderSpecialLetters = function() {
     const lowerContainer = document.getElementById('specialLowercaseContainer');
     const upperContainer = document.getElementById('specialUppercaseContainer');
 
-    console.log("🔍 [Glyph Rendering] DOM Containers Check:", {
-        specialLowercaseContainer: !!lowerContainer,
-        specialUppercaseContainer: !!upperContainer
-    });
-
     if (khowarGlyphs.lowercase || khowarGlyphs.uppercase) {
         if (lowerContainer) {
             const html = createGlyphCards(khowarGlyphs.lowercase || {}, "Lowercase");
             lowerContainer.innerHTML = html;
-            console.log("✅ [Glyph Rendering] Lowercase container populated.");
         } else {
             console.warn("⚠️ [Glyph Rendering] `#specialLowercaseContainer` not found in DOM.");
         }
@@ -91,7 +82,6 @@ window.renderSpecialLetters = function() {
         if (upperContainer) {
             const html = createGlyphCards(khowarGlyphs.uppercase || {}, "Uppercase");
             upperContainer.innerHTML = html;
-            console.log("✅ [Glyph Rendering] Uppercase container populated.");
         } else {
             console.warn("⚠️ [Glyph Rendering] `#specialUppercaseContainer` not found in DOM.");
         }
@@ -128,24 +118,52 @@ window.getFormattedText = function(token) {
 };
 
 // 6. Translation Input & Selection Handler
+// 6. Translation Input & Selection Handler (Debug Version)
 window.triggerTranslation = function() {
     const inputEl = document.getElementById('searchInput');
     const dirEl = document.getElementById('directionSelect');
     const outputEl = document.getElementById('translationOutput');
 
-    if (!inputEl || !dirEl || !outputEl) return;
+    if (!inputEl || !dirEl || !outputEl) {
+        console.error("❌ [Trigger] Missing DOM elements!");
+        return;
+    }
 
     const query = inputEl.value;
     const direction = dirEl.value;
+
+    console.log(`🔍 [Trigger] Query: "${query}" | Direction: "${direction}"`);
 
     if (!query.trim()) {
         outputEl.innerHTML = '<span style="color: var(--text-muted); font-size: 1rem;">Translation output will appear here...</span>';
         return;
     }
 
-    if (typeof translateQuery === 'function') {
-        const result = translateQuery(query, direction);
-        outputEl.textContent = result;
+    let result = "";
+
+    try {
+        if (direction === "en-to-kh" || direction === "english-khowar" || direction === "en") {
+            if (typeof translateEnglishToKhowar === 'function') {
+                console.log("✅ [Trigger] Calling modular `translateEnglishToKhowar`");
+                result = translateEnglishToKhowar(query);
+            } else if (typeof translateQuery === 'function') {
+                console.warn("⚠️ [Trigger] `translateEnglishToKhowar` not found. Falling back to `translateQuery`.");
+                result = translateQuery(query, direction);
+            } else {
+                console.error("❌ [Trigger] No translation function available for English to Khowar!");
+            }
+        } else {
+            if (typeof translateQuery === 'function') {
+                console.log("✅ [Trigger] Calling `translateQuery` for Khowar to English");
+                result = translateQuery(query, direction);
+            }
+        }
+
+        console.log(`✨ [Trigger] Result: "${result}"`);
+        outputEl.textContent = result || inputEl.value;//"⚠️ Translation returned empty string.";
+    } catch (err) {
+        console.error("💥 [Trigger] Runtime error during translation:", err);
+        outputEl.textContent = "Error: Check console for details.";
     }
 };
 
@@ -200,3 +218,42 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+/**
+ * Resolves any English token to its Khowar equivalent or falls back to Proper Noun.
+ * @param {string} token - The raw English word (e.g. "chair", "Samina", "fast")
+ * @param {string} [postposition=""] - Optional suffix (e.g. "-ote" for "to")
+ * @returns {string} The raw Khowar translation or passed-through name
+ */
+function resolveToken(token, postposition = "") {
+    if (!token) return "";
+    
+    const cleanToken = token.trim().toLowerCase();
+
+    // 1. Check Pronouns
+    const pronoun = pronounsData.find(p => p.english.toLowerCase() === cleanToken);
+    if (pronoun) return pronoun.khowar_raw + postposition;
+
+    // 2. Check Nouns
+    const noun = nounsData.find(n => n.english.toLowerCase() === cleanToken);
+    if (noun) return noun.khowar_raw + postposition;
+
+    // 3. Check Adjectives
+    const adj = adjectivesData.find(a => a.english.toLowerCase() === cleanToken);
+    if (adj) return adj.khowar_raw;
+
+    // 4. Check Adverbs (if adverbsData array exists)
+    if (typeof adverbsData !== 'undefined') {
+        const adv = adverbsData.find(a => a.english.toLowerCase() === cleanToken);
+        if (adv) return adv.khowar_raw;
+    }
+
+    // 5. Fallback: Proper Noun / Unrecognized Word
+    // Preserves original casing or capitalizes the first letter
+    const isCapitalized = token[0] === token[0].toUpperCase();
+    const formattedName = isCapitalized 
+        ? token 
+        : token.charAt(0).toUpperCase() + token.slice(1);
+
+    return formattedName + postposition;
+}

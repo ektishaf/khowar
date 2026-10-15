@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khowar Dictionary</title>
+    <meta name="description" content="Explore a comprehensive public master dictionary of Khowar words, nouns, verbs, adverbs, and cultural datasets from Chitral, Gilgit, and Baltistan. Searchable for learners and AI agents.">
+    <!-- Open Graph for AI / Social previews -->
+    <meta property="og:title" content="Khowar Dictionary">
+    <meta property="og:description" content="Open public repository of Khowar language datasets and glyph translations.">
+    <meta property="og:type" content="website">
+
+    <style>
+        @font-face {
+            font-family: 'KhowarRegular';
+            src: url('fonts/Khowar-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent: #2563eb;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .search-controls {
+            display: grid;
+            grid-template-columns: 1fr 200px;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        #searchInput {
+            font-family: 'KhowarRegular', system-ui, -apple-system, sans-serif;
+            font-size: 1.1rem;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        #searchInput:focus {
+            border-color: var(--accent);
+        }
+
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background: var(--card-bg);
+            color: var(--text-main);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: var(--bg-color);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background-color: var(--bg-color);
+        }
+
+        .khowar-glyph-cell {
+            font-family: 'KhowarRegular', sans-serif !important;
+            font-size: 1rem;
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        .raw-code {
+            font-family: monospace;
+            background: var(--bg-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--text-main);
+            font-size: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .category-tag {
+            font-size: 0.75rem;
+            font-weight: bold;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: var(--text-main);
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">Khowar Dictionary</div>
+        <div>
+            <a href="index.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">← Back to Translator</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="search-controls">
+                <input type="text" id="searchInput" placeholder="Search English term or Khowar string..." onkeyup="filterDictionary()">
+                <select id="categorySelect" onchange="filterDictionary()">
+                    <option value="ALL">All Categories</option>
+                    <option value="Noun">Nouns</option>
+                    <option value="Verb">Verbs</option>
+                    <option value="Adverb">Adverbs</option>
+                    <option value="Pronoun">Pronouns</option>
+                    <option value="Preposition">Prepositions</option>
+                </select>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Category</th>
+                        <th style="width: 30%;">English</th>
+                        <th style="width: 30%;">Formatted Khowar</th>
+                        <th style="width: 25%;">Raw Glyph Notation</th>
+                    </tr>
+                </thead>
+                <tbody id="dictBody">
+                    <!-- Dynamic Dictionary Rows -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- DATASETS -->
+    <script src="data/nouns.js"></script>
+    <script src="data/verbs.js"></script>
+    <script src="data/adverbs.js"></script>
+    <script src="data/pronouns.js"></script>
+    <script src="data/prepositions.js"></script>
+
+    <script src="js/glyphs.js"></script>
+    <script src="js/formatter.js"></script>
+
+    <script>
+        let masterDictionary = [];
+
+        function loadDictionary() {
+            console.log("🔍 Initializing Dictionary Loading...");
+            
+            // Check if formatKhowarText is accessible
+            if (typeof formatKhowarText === 'function') {
+                console.log("✅ formatKhowarText function loaded successfully!");
+            } else {
+                console.error("❌ CRITICAL: formatKhowarText is NOT defined! Check js/formatter.js path.");
+            }
+
+            masterDictionary = [];
+
+            // 1. Nouns
+            if (typeof nounsData !== 'undefined') {
+                console.log(`📦 Nouns Dataset Found (${nounsData.length} entries)`);
+                nounsData.forEach(item => {
+                    if (item.english) {
+                        masterDictionary.push({ category: 'Noun', english: item.english, raw: item.khowar_raw || item.khowar || '' });
+                    }
+                });
+            } else {
+                console.warn("⚠️ Nouns Dataset (nounsData) not found.");
+            }
+
+            // 2. Verbs
+            if (typeof verbsData !== 'undefined') {
+                console.log(`📦 Verbs Dataset Found (${verbsData.length} entries)`);
+                verbsData.forEach(item => {
+                    const eng = typeof item.english === 'string' ? item.english : (item.english?.first || '');
+                    if (eng) {
+                        masterDictionary.push({ category: 'Verb', english: eng, raw: item.khowar_base || item.imperative || item.khowar_raw || '' });
+                    }
+                });
+            } else {
+                console.warn("⚠️ Verbs Dataset (verbsData) not found.");
+            }
+
+            // 3. Adverbs
+            if (typeof adverbsData !== 'undefined') {
+                console.log(`📦 Adverbs Dataset Found (${adverbsData.length} entries)`);
+                adverbsData.forEach(item => {
+                    const eng = item.english || item.word || '';
+                    if (eng) {
+                        masterDictionary.push({ category: 'Adverb', english: eng, raw: item.khowar_raw || item.khowar || '' });
+                    }
+                });
+            } else {
+                console.warn("⚠️ Adverbs Dataset (adverbsData) not found.");
+            }
+
+            // 4. Pronouns
+            if (typeof pronounsData !== 'undefined') {
+                console.log(`📦 Pronouns Dataset Found (${pronounsData.length} entries)`);
+                pronounsData.forEach(item => {
+                    if (item.english) {
+                        masterDictionary.push({ category: 'Pronoun', english: item.english, raw: item.khowar_raw || item.khowar || '' });
+                    }
+                });
+            } else {
+                console.warn("⚠️ Pronouns Dataset (pronounsData) not found.");
+            }
+
+            // 5. Prepositions
+            if (typeof prepositionsData !== 'undefined') {
+                console.log(`📦 Prepositions Dataset Found (${prepositionsData.length} entries)`);
+                prepositionsData.forEach(item => {
+                    if (item.english) {
+                        masterDictionary.push({ category: 'Preposition', english: item.english, raw: item.suffix || item.khowar_raw || item.khowar || '' });
+                    }
+                });
+            } else {
+                console.warn("⚠️ Prepositions Dataset (prepositionsData) not found.");
+            }
+
+            console.log(`🎉 Master Dictionary Loaded: Total ${masterDictionary.length} entries.`);
+            renderTable(masterDictionary);
+        }
+
+        function renderTable(data) {
+            console.log(`🎨 Rendering Table with ${data.length} rows...`);
+            const tbody = document.getElementById('dictBody');
+            tbody.innerHTML = '';
+
+            let bracketedLogsCount = 0;
+
+            data.forEach((entry, index) => {
+                const rawString = entry.raw || '';
+                let formattedKhowar = rawString;
+
+                if (typeof formatKhowarText === 'function') {
+                    formattedKhowar = formatKhowarText(rawString);
+                }
+
+                // Log the first 5 entries containing brackets [...] to inspect transformation
+                if (rawString.includes('[') && bracketedLogsCount < 5) {
+                    console.log(`🔤 [Bracket Test #${bracketedLogsCount + 1}] Raw: "${rawString}" ➔ Formatted: "${formattedKhowar}"`);
+                    bracketedLogsCount++;
+                }
+
+                const row = document.createElement('tr');
+                
+                const catCell = document.createElement('td');
+                catCell.innerHTML = `<span class="category-tag">${entry.category}</span>`;
+                
+                const engCell = document.createElement('td');
+                engCell.innerHTML = `<strong>${escapeHtml(entry.english)}</strong>`;
+                
+                const khowarCell = document.createElement('td');
+                khowarCell.className = 'khowar-glyph-cell';
+                khowarCell.innerHTML = formattedKhowar;
+                
+                const rawCell = document.createElement('td');
+                rawCell.innerHTML = `<span class="raw-code">${escapeHtml(rawString)}</span>`;
+                
+                row.appendChild(catCell);
+                row.appendChild(engCell);
+                row.appendChild(khowarCell);
+                row.appendChild(rawCell);
+                
+                tbody.appendChild(row);
+            });
+
+            console.log("✅ Table Render Complete!");
+        }
+
+        function filterDictionary() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const category = document.getElementById('categorySelect').value;
+
+            console.log(`🔎 Filtering Dictionary - Search: "${query}", Category: "${category}"`);
+
+            const filtered = masterDictionary.filter(item => {
+                const matchesQuery = (item.english && item.english.toLowerCase().includes(query)) || 
+                                     (item.raw && item.raw.toLowerCase().includes(query));
+                const matchesCategory = (category === 'ALL' || item.category === category);
+                return matchesQuery && matchesCategory;
+            });
+
+            renderTable(filtered);
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDictionary);
+    </script>
+</body>
+</html>

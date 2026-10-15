@@ -1,11 +1,11 @@
 const sentencesData = [
   {
     "id": "s001",
-    "english_text": "i go to school",
+    "english_text": "God is one",
     "structure": {
       "subject": "i",
       "object": "school",
-      "preposition": "to",
+      "preposition": "[A[lh][lh]ah e asur",
       "verb": "go"
     },
     "khowar_raw": "awa schoolo[tl] bim"

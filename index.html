@@ -9,7 +9,10 @@
 <body>
 
 <header>
- <div class="brand">Khowar Simplified</div>
+ <div class="brand">Khowar</div>
+    <nav>
+        <a href="dictionary.html" style="color: var(--accent); text-decoration: none; font-weight: 600; padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 6px; background: var(--card-bg);">Khowar Dictionary</a>
+    </nav>
  <select id="langSelect" style="width: auto;">
  <option value="en">English Version</option>
 <option value="kh">Khowar Version</option>
@@ -73,11 +76,19 @@
  <script src="data/pronouns.js"></script>
  <script src="data/prepositions.js"></script>
  <script src="data/sentences.js"></script>
+<script src="data/conjunctions.js"></script>
+<script src="data/adjectives.js"></script>
+<script src="data/adverbs.js"></script>
+<script src="data/possessives.js"></script>
 
  <!-- Modular Utilities Engine -->
 <script src="js/formatter.js"></script>
 <script src="js/audio.js"></script>
-<script src="js/translator.js"></script>
+<script src="engines/tensesEngine.js"></script>
+<script src="engines/imperativeEngine.js"></script>
+<script src="engines/compoundEngine.js"></script>
+<script src="engines/interrogativeEngine.js"></script>
+<script src="js/router.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
