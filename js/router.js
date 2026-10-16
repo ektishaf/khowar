@@ -6,6 +6,21 @@
  * Master Entry Point for English to Khowar translation
  */
 function translateEnglishToKhowar(inputText) {
+
+    const cleanInput = inputText.trim().toLowerCase();
+
+    // --- ADDITIVE HOOK: Counting Engine (Numbers & Digits) ---
+    if (typeof parseEnglishNumberWord === 'function' && typeof translateNumberToKhowar === 'function') {
+        const parsedNumber = parseEnglishNumberWord(cleanInput);
+        if (parsedNumber !== null) {
+            const khowarNum = translateNumberToKhowar(parsedNumber);
+            if (khowarNum) {
+                console.log("🔍 [Router] Number translated via Counting Engine.");
+                return formatKhowarText(khowarNum);
+            }
+        }
+    }
+
     // Step 1: Check for Compound Sentences first (split by coordinating conjunctions)
     return translateCompoundEnglishToKhowar(inputText);
 }

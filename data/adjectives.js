@@ -1,3 +1,97 @@
 const adjectivesData = [
-  { "english": "fast", "khowar_raw": "uchu[tl]u", "category": "speed" }
+  // Speed & Movement
+  { "english": "fast", "khowar_raw": "uchu[tl]u", "category": "speed" },
+  { "english": "slow", "khowar_raw": "lash", "category": "speed" },
+  { "english": "quick", "khowar_raw": "[ch]a[tl]", "category": "speed" },
+  { "english": "rapid", "khowar_raw": "[sh]ao", "category": "speed" },
+
+  // Size & Dimension
+  { "english": "big", "khowar_raw": "lot", "category": "size" },
+  { "english": "small", "khowar_raw": "[cl]e[qh]", "category": "size" },
+  { "english": "large", "khowar_raw": "lot", "category": "size" },
+  { "english": "huge", "khowar_raw": "lot", "category": "size" },
+  { "english": "tiny", "khowar_raw": "chuchuni", "category": "size" },
+  { "english": "long", "khowar_raw": "[dl]ungar", "category": "size" },
+  { "english": "short", "khowar_raw": "b[lh]a[cl]", "category": "size" },
+  { "english": "tall", "khowar_raw": "[dl]rung", "category": "size" },
+  { "english": "wide", "khowar_raw": "biro[gh]un", "category": "size" },
+  { "english": "narrow", "khowar_raw": "[tl]rang", "category": "size" },
+  { "english": "deep", "khowar_raw": "ku[lh]oom", "category": "size" },
+  { "english": "shallow", "khowar_raw": "[sh]oi", "category": "size" },
+  { "english": "thick", "khowar_raw": "[tl]hool", "category": "size" },
+  { "english": "thin", "khowar_raw": "[zh]o[gh]", "category": "size" },
+  { "english": "heavy", "khowar_raw": "[qh]ayi", "category": "size" },
+  { "english": "light", "khowar_raw": "lo[cl]", "category": "size" },
+
+  // Quality & Condition
+  { "english": "good", "khowar_raw": "jam", "category": "quality" },
+  { "english": "bad", "khowar_raw": "shoom", "category": "quality" },
+  { "english": "excellent", "khowar_raw": "jam", "category": "quality" },
+  { "english": "nice", "khowar_raw": "jam", "category": "quality" },
+  { "english": "clean", "khowar_raw": "safar", "category": "quality" },
+  { "english": "dirty", "khowar_raw": "gangus[tl]i", "category": "quality" },
+  { "english": "soft", "khowar_raw": "plash", "category": "quality" },
+  { "english": "hard", "khowar_raw": "dang", "category": "quality" },
+  { "english": "smooth", "khowar_raw": "po[kh]", "category": "quality" },
+  { "english": "rough", "khowar_raw": "ni[sh]i", "category": "quality" },
+  { "english": "strong", "khowar_raw": "mezbu[tl]", "category": "quality" },
+  { "english": "weak", "khowar_raw": "[zh]o[gh]", "category": "quality" },
+  { "english": "sharp", "khowar_raw": "[tl]ukhunu", "category": "quality" },
+  { "english": "blunt", "khowar_raw": "mutu", "category": "quality" },
+  { "english": "fresh", "khowar_raw": "taza", "category": "quality" },
+  { "english": "stale", "khowar_raw": "puli", "category": "quality" },
+  { "english": "sweet", "khowar_raw": "shireen", "category": "quality" },
+  { "english": "bitter", "khowar_raw": "tro[qh]", "category": "quality" },
+  { "english": "sour", "khowar_raw": "shu[tl]", "category": "quality" },
+  { "english": "salty", "khowar_raw": "[sh]or", "category": "quality" },
+
+  // Temperature & Weather
+  { "english": "hot", "khowar_raw": "pe[ch]", "category": "temperature" },
+  { "english": "cold", "khowar_raw": "u[sh]ak", "category": "temperature" },
+  { "english": "warm", "khowar_raw": "kosa", "category": "temperature" },
+  { "english": "cool", "khowar_raw": "sharu", "category": "temperature" },
+  { "english": "dry", "khowar_raw": "[ch]u[ch]u", "category": "temperature" },
+  { "english": "wet", "khowar_raw": "[jl]ah", "category": "temperature" },
+
+  // Age & Time
+  { "english": "new", "khowar_raw": "no[gh]", "category": "age" },
+  { "english": "old", "khowar_raw": "paranu", "category": "age" },
+  { "english": "young", "khowar_raw": "juwan", "category": "age" },
+  { "english": "ancient", "khowar_raw": "[qh]adimi", "category": "age" },
+  { "english": "modern", "khowar_raw": "no[gh]", "category": "age" },
+  { "english": "early", "khowar_raw": "nas[tl]", "category": "age" },
+  { "english": "late", "khowar_raw": "goor", "category": "age" },
+
+  // Feelings & Emotions
+  { "english": "happy", "khowar_raw": "[kh]oshan", "category": "emotion" },
+  { "english": "sad", "khowar_raw": "[dl]ish", "category": "emotion" },
+  { "english": "angry", "khowar_raw": "[qh]ahri", "category": "emotion" },
+  { "english": "fearful", "khowar_raw": "bu[kh][tl]uwak", "category": "emotion" },
+  { "english": "brave", "khowar_raw": "phur[dl]il", "category": "emotion" },
+  { "english": "calm", "khowar_raw": "", "category": "emotion" },
+  { "english": "tired", "khowar_raw": "[kh]esma[tl]", "category": "emotion" },
+  { "english": "excited", "khowar_raw": "[ch]iu", "category": "emotion" },
+
+  // Appearance & Shape
+  { "english": "beautiful", "khowar_raw": "[sh]eli", "category": "appearance" },
+  { "english": "ugly", "khowar_raw": "[dl]a[kh][tl]", "category": "appearance" },
+  { "english": "bright", "khowar_raw": "rosh[tl]", "category": "appearance" },
+  { "english": "dark", "khowar_raw": "chui", "category": "appearance" },
+  { "english": "round", "khowar_raw": "pindoru", "category": "appearance" },
+  { "english": "square", "khowar_raw": "", "category": "appearance" },
+  { "english": "flat", "khowar_raw": "lasht", "category": "appearance" },
+  { "english": "straight", "khowar_raw": "", "category": "appearance" },
+  { "english": "crooked", "khowar_raw": "shoom", "category": "appearance" },
+
+  // Value & Availability
+  { "english": "rich", "khowar_raw": "set", "category": "value" },
+  { "english": "poor", "khowar_raw": "ma[sh]kak", "category": "value" },
+  { "english": "cheap", "khowar_raw": "", "category": "value" },
+  { "english": "expensive", "khowar_raw": "[qh]eima[tl]", "category": "value" },
+  { "english": "easy", "khowar_raw": "lo[cl]", "category": "value" },
+  { "english": "difficult", "khowar_raw": "[qh]ayi", "category": "value" },
+  { "english": "free", "khowar_raw": "ingar", "category": "value" },
+  { "english": "busy", "khowar_raw": "khio muzhy", "category": "value" },
+  { "english": "empty", "khowar_raw": "[kh]ali", "category": "value" },
+  { "english": "full", "khowar_raw": "tip", "category": "value" }
 ];

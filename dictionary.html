@@ -155,7 +155,7 @@
 <body>
 
     <header>
-        <div class="brand">Khowar Dictionary</div>
+        <div class="brand">Khowar Dictionary <span id="wordCount" style="font-size: 0.9rem; font-weight: 500; color: var(--text-muted); margin-left: 6px;">(words: 0)</span></div>
         <div>
             <a href="index.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">← Back to Translator</a>
         </div>
@@ -174,14 +174,13 @@
                     <option value="Preposition">Prepositions</option>
                 </select>
             </div>
-
+            
             <table>
                 <thead>
                     <tr>
                         <th style="width: 15%;">Category</th>
                         <th style="width: 30%;">English</th>
-                        <th style="width: 30%;">Formatted Khowar</th>
-                        <th style="width: 25%;">Raw Glyph Notation</th>
+                        <th style="width: 30%;">Khowar</th>
                     </tr>
                 </thead>
                 <tbody id="dictBody">
@@ -315,16 +314,18 @@
                 khowarCell.className = 'khowar-glyph-cell';
                 khowarCell.innerHTML = formattedKhowar;
                 
-                const rawCell = document.createElement('td');
-                rawCell.innerHTML = `<span class="raw-code">${escapeHtml(rawString)}</span>`;
-                
                 row.appendChild(catCell);
                 row.appendChild(engCell);
                 row.appendChild(khowarCell);
-                row.appendChild(rawCell);
                 
                 tbody.appendChild(row);
             });
+
+            // Update word counter dynamically based on displayed rows
+            const wordCountElem = document.getElementById('wordCount');
+            if (wordCountElem) {
+                wordCountElem.textContent = `words: ${data.length}`;
+            }
 
             console.log("✅ Table Render Complete!");
         }

@@ -1,6 +1,6 @@
 const adverbsData = [
   { "english": "fast", "khowar_raw": "[sh]ao", "category": "manner" },
-  { "english": "quickly", "khowar_raw": "uchu[tl]", "category": "manner" },
+  { "english": "quickly", "khowar_raw": "[ch]a[tl]", "category": "manner" },
   { "english": "slowly", "khowar_raw": "lash", "category": "manner" },
   { "english": "well", "khowar_raw": "jam", "category": "manner" },
   { "english": "now", "khowar_raw": "hanisey", "category": "time" },
