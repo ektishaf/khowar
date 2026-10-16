@@ -34,16 +34,15 @@ Our main translation app features built-in audio pronunciation for each letter a
 
 ### Khowar Counting Engine & System
 
-Khowar uses a **vigesimal (base-20) counting system**, where numbers build logically using multiples of **20 (`bishir`)** plus additions of **10 (`josh`)** and digits **1–9 (`e` to `niyof`)**. Beyond 100, numbers attach remainders using the conjunction **`oche`** ("and").
+Khowar uses a **vigesimal (base-20) counting system**, where numbers build logically using multiples of **20 (`bishir`)** plus additions of **10 (`josh`)** and digits **1–9 (`e` to `neoof`)**. Beyond 100, numbers attach remainders using the conjunction **`oche`** ("and").
 
-Because this follows a pure mathematical rule, thousands of static JSON entries are not required for every single number. Instead, core base units are defined, and `countingEngine.js` dynamically generates translations from **1 up to 100 Quadrillion (`shankh`)** and beyond.
+Because this follows a pure mathematical rule, thousands of static entries are not required for every single number. Instead, core base units are defined, and Khowar Counting Engine dynamically generates translations from **1 up to 100 Quadrillion (`shankh`)** and beyond.
 
-#### 1. Base JSON Data (`numbers.js`)
+#### Khowar Counting
 
 You only need to store the core building blocks in your lexicon dataset:
 
-```javascript
-const numbersData = {
+```
   // Core Digits (1-10)
   "1": "e",
   "2": "ju",
@@ -61,13 +60,13 @@ const numbersData = {
   "100": "shor",
   "1000": "hazar",
   "100000": "lakh",                  // 100 Thousand
-  "10000000": "khorur",               // 10 Million
+  "10000000": "khorur",              // 10 Million
   "1000000000": "arab",              // 1 Billion
   "100000000000": "kharab",          // 100 Billion
   "10000000000000": "neel",          // 10 Trillion
   "1000000000000000": "padam",       // 1 Quadrillion
   "100000000000000000": "shankh"     // 100 Quadrillion
-};
+```
 
 ## 📺 Video Tutorials for Script Mastery
 
