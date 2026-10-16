@@ -43,7 +43,8 @@ Because this follows a pure mathematical rule, thousands of static entries are n
 You only need to store the core building blocks in your lexicon dataset:
 
 ```
-  // Core Digits (1-10)
+  // Core Digits (0-10)
+  "0": "sifur",
   "1": "e",
   "2": "ju",
   "3": "[tl]roi",
