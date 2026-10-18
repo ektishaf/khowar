@@ -118,22 +118,22 @@
 
 <div class="editor-wrapper">
     <div class="card">
-        <h2>🏔️ Khowar Web Editor & Embed Generator</h2>
-        <p style="color: var(--text-muted); margin-bottom: 20px;">Compose content using your custom glyphs and font mappings, then generate an embed code to publish Khowar on external websites.</p>
+        <h2>Khowar Editor</h2>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">Compose content in Khowar and then generate an embed code to publish Khowar on external websites.</p>
+
+        <!-- Writing Area -->
+        <textarea id="editorInput" class="khowar-font" placeholder="Type or click glyph buttons above to compose..."></textarea>
 
         <!-- Dynamic Glyph Toolbars (Powered by glyphs.js) -->
         <div class="toolbar-group">
-            <div class="toolbar-title">Special Khowar Glyphs (Lowercase PUA)</div>
+            <div class="toolbar-title">Special Khowar Glyphs (Lowercase)</div>
             <div class="glyph-toolbar" id="editorLowercaseToolbar"></div>
         </div>
 
         <div class="toolbar-group">
-            <div class="toolbar-title">Special Khowar Glyphs (Uppercase PUA)</div>
+            <div class="toolbar-title">Special Khowar Glyphs (Uppercase)</div>
             <div class="glyph-toolbar" id="editorUppercaseToolbar"></div>
         </div>
-
-        <!-- Writing Area -->
-        <textarea id="editorInput" class="khowar-font" placeholder="Type or click glyph buttons above to compose..."></textarea>
 
         <button onclick="generateEmbedCode()" class="glyph-card" style="width: auto; padding: 0.7rem 1.5rem; background: var(--accent); color: white; border: none; font-weight: 600; cursor: pointer;">
             📋 Generate Website Embed Code
@@ -146,35 +146,51 @@
 
 <!-- Character Maps & Script Definition -->
 <script src="js/glyphs.js"></script>
-
+<script src="js/script.js"></script>
+<script src="js/formatter.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // Populate Lowercase PUA Glyphs Toolbar from glyphs.js
-        const lowerContainer = document.getElementById("editorLowercaseToolbar");
-        if (typeof khowarGlyphs !== "undefined" && khowarGlyphs.lowercase) {
-            Object.entries(khowarGlyphs.lowercase).forEach(([token, char]) => {
-                const btn = document.createElement("button");
-                btn.className = "glyph-btn khowar-font";
-                btn.textContent = char;
-                btn.title = token; // Hover shows token representation like [cl], [sh], etc.
-                btn.onclick = () => insertAtCursor(char);
-                lowerContainer.appendChild(btn);
-            });
+    // Helper function to resolve a token (e.g. "[ch]" or "a") to its output character/glyph
+    function resolveGlyphChar(token, isUpper = false) {
+        if (typeof khowarGlyphs !== "undefined") {
+            const map = isUpper ? khowarGlyphs.uppercase : khowarGlyphs.lowercase;
+            if (map && map[token]) {
+                return map[token]; // Returns PUA character like '\uE001'
+            }
         }
+        return token; // Returns standard character like 'a'
+    }
 
-        // Populate Uppercase PUA Glyphs Toolbar from glyphs.js
-        const upperContainer = document.getElementById("editorUppercaseToolbar");
-        if (typeof khowarGlyphs !== "undefined" && khowarGlyphs.uppercase) {
-            Object.entries(khowarGlyphs.uppercase).forEach(([token, char]) => {
-                const btn = document.createElement("button");
-                btn.className = "glyph-btn khowar-font";
-                btn.textContent = char;
-                btn.title = token;
-                btn.onclick = () => insertAtCursor(char);
-                upperContainer.appendChild(btn);
-            });
-        }
-    });
+    // Populate Full Lowercase Alphabet Toolbar
+    const lowerContainer = document.getElementById("editorLowercaseToolbar");
+    if (lowerContainer && typeof khowarScript !== "undefined" && khowarScript.lowercase) {
+        lowerContainer.innerHTML = ""; // Clear existing toolbar buttons
+        khowarScript.lowercase.forEach((token) => {
+            const charToInsert = resolveGlyphChar(token, false);
+            const btn = document.createElement("button");
+            btn.className = "glyph-btn khowar-font";
+            btn.textContent = charToInsert;
+            btn.title = token; // Hover shows token representation (e.g., "[ch]", "a")
+            btn.onclick = () => insertAtCursor(charToInsert);
+            lowerContainer.appendChild(btn);
+        });
+    }
+
+    // Populate Full Uppercase Alphabet Toolbar
+    const upperContainer = document.getElementById("editorUppercaseToolbar");
+    if (upperContainer && typeof khowarScript !== "undefined" && khowarScript.uppercase) {
+        upperContainer.innerHTML = ""; // Clear existing toolbar buttons
+        khowarScript.uppercase.forEach((token) => {
+            const charToInsert = resolveGlyphChar(token, true);
+            const btn = document.createElement("button");
+            btn.className = "glyph-btn khowar-font";
+            btn.textContent = charToInsert;
+            btn.title = token; // Hover shows token representation (e.g., "[Ch]", "A")
+            btn.onclick = () => insertAtCursor(charToInsert);
+            upperContainer.appendChild(btn);
+        });
+    }
+});
 
     function insertAtCursor(char) {
         const textarea = document.getElementById("editorInput");
