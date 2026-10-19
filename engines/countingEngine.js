@@ -18,7 +18,7 @@ const scaleUnits = [
   { threshold: 10000000000000, name: "neel" },           // 10 Trillion
   { threshold: 100000000000, name: "kharab" },          // 100 Billion
   { threshold: 1000000000, name: "arab" },              // 1 Billion
-  { threshold: 10000000, name: "crore" },               // 10 Million
+  { threshold: 10000000, name: "khorur" },              // 10 Million
   { threshold: 100000, name: "lakh" },                  // 100 Thousand
   { threshold: 1000, name: "hazar" },                   // Thousand
   { threshold: 100, name: "shor" }                      // Hundred
