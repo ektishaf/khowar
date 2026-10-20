@@ -6,8 +6,23 @@
  * Master Entry Point for English to Khowar translation
  */
 function translateEnglishToKhowar(inputText) {
-
     const cleanInput = inputText.trim().toLowerCase();
+
+    const directionSelect = document.getElementById('directionSelect');
+    const direction = directionSelect ? directionSelect.value : 'en-to-kh';
+   
+    // If Khowar to English is selected, handle it via the reverse engine
+    if (direction === 'kh-to-en') {
+       
+        if (typeof translateKhowarToNumber === 'function') {
+           
+                const numResult = translateKhowarToNumber(cleanInput);
+                console.log("numResuolt: " + numResult);
+                if (numResult != null) {
+                    return numResult.toString();
+                }
+        }
+    }
 
     // Counting Engine (Numbers & Digits)
     if (typeof parseEnglishNumberWord === 'function' && typeof translateNumberToKhowar === 'function') {

@@ -142,7 +142,7 @@ window.triggerTranslation = function() {
     let result = "";
 
     try {
-        if (direction === "en-to-kh" || direction === "english-khowar" || direction === "en") {
+        if (direction === "en-to-kh" || direction === "kh-to-en") {
             if (typeof translateEnglishToKhowar === 'function') {
                 console.log("✅ [Trigger] Calling modular `translateEnglishToKhowar`");
                 result = translateEnglishToKhowar(query);
